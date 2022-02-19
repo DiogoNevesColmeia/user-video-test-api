@@ -6,7 +6,7 @@
   function getFrameFromAPI(frameData) {
     if (window.$) {
       window.$.ajax({
-        url: "http://focal-column-339522.rj.r.appspot.com/facial_recognition",
+        url: "https://focal-column-339522.rj.r.appspot.com/facial_recognition",
         method: "POST",
         data: {
           type: "b64",
