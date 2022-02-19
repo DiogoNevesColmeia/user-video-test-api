@@ -1,0 +1,55 @@
+html,
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+body {
+  background-color: #000;
+  color: #ffffff;
+  background-image: url("logochapada.png");
+  background-size: 90% auto;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-attachment: fixed;
+}
+canvas {
+  display: none;
+}
+video {
+  object-fit: fill;
+  float: left;
+  height: 100%;
+  max-width: 100%;
+}
+
+#user-media-container {
+  float: left;
+  width: 100%;
+  height: 100%;
+}
+
+#get-user-media-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  display: none;
+}
+
+#show-user-media {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#show-user-media img {
+  max-width: 100%;
+  height: 97%;
+  border-radius: 5px 100px 20px;
+  box-shadow: 1px 3px 30px 2px #000000;
+}
