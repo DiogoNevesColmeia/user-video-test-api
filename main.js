@@ -17,6 +17,9 @@
             frameData.processedFrame = data.image_response;
           }
         },
+        error: function () {
+          frameData.error = true;
+        },
       });
     }
   }
@@ -30,31 +33,36 @@
 
       video.srcObject = stream;
 
-      const setTimeoutId = setTimeout(() => {
-        clearTimeout(setTimeoutId);
-        (function applyNewFrame() {
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
+      (function applyNewFrame() {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
 
-          context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+        context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 
-          const frameData = {
-            frame: canvas.toDataURL(),
-            displayed: false,
-            processedFrame: "",
-          };
+        const frameData = {
+          frame: canvas.toDataURL(),
+          displayed: false,
+          processedFrame: "",
+          error: false,
+        };
 
-          getFrameFromAPI(frameData);
+        getFrameFromAPI(frameData);
 
-          const setTimeoutId = setInterval(() => {
-            if (frameData.processedFrame) {
-              clearTimeout(setTimeoutId);
-              img.src = frameData.processedFrame;
+        (function interval() {
+          const setTimeoutId = setTimeout(() => {
+            clearTimeout(setTimeoutId);
+
+            if (frameData.processedFrame || frameData.error) {
+              if (!frameData.error) {
+                img.src = frameData.processedFrame;
+              }
               frameData.displayed = true;
               applyNewFrame();
+            } else {
+              interval();
             }
-          }, 1000 / 120);
+          });
         })();
-      }, 1000);
+      })();
     });
 })();
