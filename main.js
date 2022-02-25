@@ -6,8 +6,9 @@
   function getFrameFromAPI(frameData) {
     if (window.$) {
       window.$.ajax({
-        url: "https://focal-column-339522.rj.r.appspot.com/facial_recognition",
+        url: "http://focal-column-339522.rj.r.appspot.com/facial_recognition",
         method: "POST",
+        timeout: 300,
         data: {
           type: "b64",
           url: frameData.frame.split("data:image/png;base64,")[1],
@@ -18,6 +19,7 @@
           }
         },
         error: function () {
+          frameData.processedFrame = frameData.frame;
           frameData.error = true;
         },
       });
@@ -33,36 +35,38 @@
 
       video.srcObject = stream;
 
-      (function applyNewFrame() {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+      const setTimeoutId = setTimeout(() => {
+        clearTimeout(setTimeoutId);
+        (function applyNewFrame(firstFrame) {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
 
-        context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+          context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 
-        const frameData = {
-          frame: canvas.toDataURL(),
-          displayed: false,
-          processedFrame: "",
-          error: false,
-        };
+          const frame = canvas.toDataURL();
+          const frameData = {
+            frame: frame,
+            displayed: false,
+            processedFrame: firstFrame ? frame : "",
+            error: false,
+          };
 
-        getFrameFromAPI(frameData);
+          getFrameFromAPI(frameData);
 
-        (function interval() {
-          const setTimeoutId = setTimeout(() => {
-            clearTimeout(setTimeoutId);
+          (function interval() {
+            const setTimeoutId = setTimeout(() => {
+              clearTimeout(setTimeoutId);
 
-            if (frameData.processedFrame || frameData.error) {
-              if (!frameData.error) {
+              if (frameData.processedFrame || frameData.error) {
                 img.src = frameData.processedFrame;
+                frameData.displayed = true;
+                applyNewFrame();
+              } else {
+                interval();
               }
-              frameData.displayed = true;
-              applyNewFrame();
-            } else {
-              interval();
-            }
-          });
-        })();
-      })();
+            });
+          })();
+        })(true);
+      }, 1000);
     });
 })();
