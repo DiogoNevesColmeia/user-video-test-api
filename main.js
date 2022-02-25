@@ -11,19 +11,20 @@
 
   let countErrors = 0;
   let countSuccess = 1;
+  let countAlternateFrame = 0;
   function getFrameFromAPI(frameData) {
     if (window.$) {
       const now = new Date().getTime();
       window.$.ajax({
         url: "http://focal-column-339522.rj.r.appspot.com/facial_recognition",
         method: "POST",
-        timeout: countErrors === 3 ? Infinity : 300,
+        timeout: countAlternateFrame === 3 ? 30000 : 300,
         data: {
           type: "b64",
           url: frameData.frame.split("data:image/png;base64,")[1],
         },
         success: function (data) {
-          countErrors = 0;
+          countAlternateFrame = 0;
           if (!frameData.displayed) {
             frameData.processedFrame = data.image_response;
           }
@@ -39,6 +40,7 @@
         },
         error: function () {
           countErrors += 1;
+          countAlternateFrame += 1;
           frameData.processedFrame = frameData.frame;
 
           framesTimeout.textContent = countErrors;
