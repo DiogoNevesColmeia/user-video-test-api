@@ -2,24 +2,47 @@
   const canvas = document.getElementById("get-user-media-canvas");
   const video = document.getElementById("get-user-media-video");
   const img = document.getElementById("show-user-media-image");
+
+  const framesProcessed = document.getElementById("frames-processed");
+  const framesTimeout = document.getElementById("frames-timeout");
+  const framesResponse = document.getElementById("frames-response");
+
   const context = canvas.getContext("2d");
+
+  let countErrors = 0;
+  let countSuccess = 1;
   function getFrameFromAPI(frameData) {
     if (window.$) {
+      const now = new Date().getTime();
       window.$.ajax({
         url: "http://focal-column-339522.rj.r.appspot.com/facial_recognition",
         method: "POST",
-        timeout: 300,
+        timeout: countErrors === 3 ? Infinity : 300,
         data: {
           type: "b64",
           url: frameData.frame.split("data:image/png;base64,")[1],
         },
         success: function (data) {
+          countErrors = 0;
           if (!frameData.displayed) {
             frameData.processedFrame = data.image_response;
           }
+          framesResponse.textContent =
+            (parseFloat(framesResponse.textContent) +
+              new Date().getTime() -
+              now) /
+              countSuccess +
+            "ms";
+
+          countSuccess += 1;
+          framesProcessed.textContent = countSuccess;
         },
         error: function () {
+          countErrors += 1;
           frameData.processedFrame = frameData.frame;
+
+          framesTimeout.textContent = countErrors;
+
           frameData.error = true;
         },
       });
@@ -37,7 +60,7 @@
 
       const setTimeoutId = setTimeout(() => {
         clearTimeout(setTimeoutId);
-        (function applyNewFrame(firstFrame) {
+        (function loadNewFrame(firstFrame) {
           canvas.width = video.videoWidth;
           canvas.height = video.videoHeight;
 
@@ -53,16 +76,16 @@
 
           getFrameFromAPI(frameData);
 
-          (function interval() {
+          (function loop() {
             const setTimeoutId = setTimeout(() => {
               clearTimeout(setTimeoutId);
 
               if (frameData.processedFrame || frameData.error) {
                 img.src = frameData.processedFrame;
                 frameData.displayed = true;
-                applyNewFrame();
+                loadNewFrame();
               } else {
-                interval();
+                loop();
               }
             });
           })();

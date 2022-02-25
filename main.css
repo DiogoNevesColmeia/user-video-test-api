@@ -13,6 +13,7 @@ body {
   background-repeat: no-repeat;
   background-position: center;
   background-attachment: fixed;
+  font-family: Arial, Helvetica, sans-serif;
 }
 canvas {
   display: none;
@@ -52,4 +53,25 @@ video {
   height: 97%;
   border-radius: 5px;
   box-shadow: 1px 3px 30px 2px #000000;
+}
+
+#table-logs {
+  position: fixed;
+  bottom: 0px;
+  border: 1px solid blue;
+  width: 500px;
+  height: 100x;
+  background-color: #000000;
+  max-width: 100%;
+}
+
+#table-logs th {
+  border: 1px solid #ffffff;
+  font-size: 15px;
+  padding: 10px;
+}
+#table-logs td {
+  border: 2px solid #09ff00;
+  padding: 10px;
+  text-align: center;
 }
