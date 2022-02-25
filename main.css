@@ -62,7 +62,7 @@ video {
   width: 500px;
   height: 100x;
   background-color: #000000;
-  max-width: 100%;
+  max-width: 90%;
 }
 
 #table-logs th {

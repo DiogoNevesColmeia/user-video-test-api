@@ -18,7 +18,7 @@
       window.$.ajax({
         url: "http://focal-column-339522.rj.r.appspot.com/facial_recognition",
         method: "POST",
-        timeout: countAlternateFrame === 3 ? 30000 : 300,
+        timeout: countAlternateFrame >= 2 ? 30000 : 300,
         data: {
           type: "b64",
           url: frameData.frame.split("data:image/png;base64,")[1],
@@ -39,8 +39,8 @@
           framesProcessed.textContent = countSuccess;
         },
         error: function () {
-          countErrors += 1;
           countAlternateFrame += 1;
+          countErrors += 1;
           frameData.processedFrame = frameData.frame;
 
           framesTimeout.textContent = countErrors;
@@ -85,6 +85,7 @@
               if (frameData.processedFrame || frameData.error) {
                 img.src = frameData.processedFrame;
                 frameData.displayed = true;
+
                 loadNewFrame();
               } else {
                 loop();
