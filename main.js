@@ -12,34 +12,32 @@
   let countErrors = 0;
   let countSuccess = 1;
   let countAlternateFrame = 0;
+  let responseTime = 0;
+
   function getFrameFromAPI(frameData) {
     if (window.$) {
       const now = new Date().getTime();
-      window.$.ajax({
-        url: "http://focal-column-339522.rj.r.appspot.com/facial_recognition",
+      const ajaxConfig = {
+        url: "http://colmeia-cameras-flask.herokuapp.com/facial_recognition",
+        // http://focal-column-339522.rj.r.appspot.com/facial_recognition
         method: "POST",
-        timeout: countAlternateFrame >= 2 ? 30000 : 300,
         data: {
           type: "b64",
           url: frameData.frame.split("data:image/png;base64,")[1],
         },
         success: function (data) {
-          countAlternateFrame = 0;
           if (!frameData.displayed) {
             frameData.processedFrame = data.image_response;
           }
+          responseTime += new Date().getTime() - now;
+
           framesResponse.textContent =
-            (parseFloat(framesResponse.textContent) +
-              new Date().getTime() -
-              now) /
-              countSuccess +
-            "ms";
+            Math.round(responseTime / countSuccess) + "ms";
 
           countSuccess += 1;
           framesProcessed.textContent = countSuccess;
         },
         error: function () {
-          countAlternateFrame += 1;
           countErrors += 1;
           frameData.processedFrame = frameData.frame;
 
@@ -47,7 +45,15 @@
 
           frameData.error = true;
         },
-      });
+      };
+
+      if (countAlternateFrame <= 4) {
+        ajaxConfig.timeout = 300;
+      } else {
+        countAlternateFrame = 0;
+      }
+
+      window.$.ajax(ajaxConfig);
     }
   }
 
@@ -77,7 +83,6 @@
           };
 
           getFrameFromAPI(frameData);
-
           (function loop() {
             const setTimeoutId = setTimeout(() => {
               clearTimeout(setTimeoutId);
@@ -85,7 +90,7 @@
               if (frameData.processedFrame || frameData.error) {
                 img.src = frameData.processedFrame;
                 frameData.displayed = true;
-
+                countAlternateFrame += 1;
                 loadNewFrame();
               } else {
                 loop();
